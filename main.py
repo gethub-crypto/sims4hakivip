@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ==================== НАСТРОЙКИ ====================
 BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
-CHANNEL_ID = -1002150000000  
+CHANNEL_ID = -1004390196653
 PRODUCT_PRICE = 50
 # =================================================
 
