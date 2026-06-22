@@ -9,7 +9,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
 # ID вашего приватного канала (должно начинаться с -100, например: -100123456789)
 # Как узнать ID: пересылайте любое сообщение из канала в бот @ShowJsonBot
-CHANNEL_ID = -1002150000000  
+CHANNEL_ID = -1004390196653
 PRODUCT_PRICE = 50  # Цена в Звёздах (например, 50 ⭐️)
 # ======================================================================
 
