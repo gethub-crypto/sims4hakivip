@@ -7,8 +7,8 @@ from aiogram.types import LabeledPrice, PreCheckoutQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ==================== НАСТРОЙКИ ====================
-BOT_TOKEN = "СЮДА_ВАШ_ТОКЕН"
-CHANNEL_ID = -1002150000000  
+BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
+CHANNEL_ID = -1004390196653  
 PRODUCT_PRICE = 50
 # =================================================
 
