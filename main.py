@@ -6,7 +6,7 @@ from aiogram.types import LabeledPrice, PreCheckoutQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ==================== НАСТРОЙКИ (ЗАМЕНИТЕ НА СВОИ) ====================
-BOT_TOKEN = "СЮДА_ВСТАВЬТЕ_ТОКЕН_ИЗ_BOTFATHER"
+BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
 # ID вашего приватного канала (должно начинаться с -100, например: -100123456789)
 # Как узнать ID: пересылайте любое сообщение из канала в бот @ShowJsonBot
 CHANNEL_ID = -1002150000000  
