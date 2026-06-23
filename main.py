@@ -10,9 +10,9 @@ from aiogram.types import LabeledPrice, PreCheckoutQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ==================== НАСТРОЙКИ ====================
-BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
-CHANNEL_ID = -1004390196653  # Ваш ID канала
-PRODUCT_PRICE = 50  # Цена в Stars
+BOT_TOKEN = "ВАШ_ТОКЕН_СЮДА"
+CHANNEL_ID = -1002150000000  # Ваш ID канала
+PRODUCT_PRICE = 199  # Цена в Stars (199 ⭐️)
 SUBSCRIPTION_DAYS = 30  # На сколько дней доступ
 TEST_MODE = True  # False когда всё готово
 
@@ -123,18 +123,16 @@ async def cmd_start(message: types.Message):
         )
     else:
         builder = InlineKeyboardBuilder()
-        price = 1 if TEST_MODE else PRODUCT_PRICE
-        builder.button(
-            text=f"💎 Купить доступ за {price} ⭐️", 
-            callback_data="send_invoice"
-        )
+        price = "ТЕСТ" if TEST_MODE else PRODUCT_PRICE
+        button_text = f"💎 Купить доступ за {price} ⭐️" if not TEST_MODE else f"🧪 ТЕСТ: Активировать доступ ({SUBSCRIPTION_DAYS} дней)"
+        builder.button(text=button_text, callback_data="send_invoice")
         
         await message.answer(
             f"Привет, {message.from_user.first_name}! 👋\n\n"
             f"🔒 Получите доступ в закрытый канал с материалами!\n"
             f"📅 Подписка на {SUBSCRIPTION_DAYS} дней\n"
-            f"💰 Стоимость: {price} ⭐️\n\n"
-            f"Нажмите на кнопку ниже для оплаты:",
+            f"💰 Стоимость: {PRODUCT_PRICE} ⭐️\n\n"
+            f"{'🧪 РЕЖИМ ТЕСТИРОВАНИЯ: оплата не спишется' if TEST_MODE else 'Нажмите на кнопку ниже для оплаты:'}",
             reply_markup=builder.as_markup()
         )
 
@@ -200,27 +198,49 @@ async def buy_command(message: types.Message):
     await send_invoice(message)
 
 async def send_invoice(message: types.Message):
-    price = 1 if TEST_MODE else PRODUCT_PRICE
-    test_text = "🧪 ТЕСТОВЫЙ ПЛАТЕЖ\n" if TEST_MODE else ""
-    
-    try:
-        await bot.send_invoice(
-            chat_id=message.chat.id,
-            title="Доступ в закрытый канал",
-            description=f"{test_text}Подписка на {SUBSCRIPTION_DAYS} дней",
-            payload="test_payload" if TEST_MODE else "channel_access_payload",
-            provider_token="",
-            currency="XTR",
-            prices=[LabeledPrice(label=f"Подписка на {SUBSCRIPTION_DAYS} дней", amount=price)],
-            start_parameter="channel_access"
-        )
-    except Exception as e:
-        logger.error(f"Ошибка отправки счета: {e}")
-        await message.answer("❌ Ошибка при создании счета. Попробуйте позже.")
+    """Отправка счета или тестовая активация"""
+    if TEST_MODE:
+        # В тестовом режиме сразу активируем подписку без оплаты
+        user_id = message.from_user.id
+        username = message.from_user.username or message.from_user.full_name
+        
+        add_subscription(user_id, username)
+        
+        try:
+            invite_link = await bot.create_chat_invite_link(
+                chat_id=CHANNEL_ID,
+                member_limit=1
+            )
+            
+            await message.answer(
+                f"🧪 ТЕСТОВЫЙ РЕЖИМ: Подписка активирована!\n\n"
+                f"✅ Доступ на {SUBSCRIPTION_DAYS} дней\n"
+                f"🔗 Ссылка: {invite_link.invite_link}\n\n"
+                f"💰 Оплата НЕ списана (тестовый режим)\n"
+                f"📊 Статус: /status"
+            )
+        except Exception as e:
+            logger.error(f"Ошибка создания ссылки: {e}")
+            await message.answer(f"❌ Ошибка: {e}")
+    else:
+        # Реальная оплата
+        try:
+            await bot.send_invoice(
+                chat_id=message.chat.id,
+                title="Доступ в закрытый канал",
+                description=f"Подписка на {SUBSCRIPTION_DAYS} дней",
+                payload="channel_access_payload",
+                provider_token="",
+                currency="XTR",
+                prices=[LabeledPrice(label=f"Подписка на {SUBSCRIPTION_DAYS} дней", amount=PRODUCT_PRICE)],
+                start_parameter="channel_access"
+            )
+        except Exception as e:
+            logger.error(f"Ошибка отправки счета: {e}")
+            await message.answer("❌ Ошибка при создании счета. Попробуйте позже.")
 
 @dp.pre_checkout_query()
 async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery):
-    # Здесь можно добавить дополнительные проверки
     logger.info(f"Pre-checkout запрос от пользователя {pre_checkout_query.from_user.id}")
     await pre_checkout_query.answer(ok=True)
 
@@ -356,62 +376,17 @@ async def check_expired_subscriptions():
             logger.error(f"Ошибка в цикле проверки подписок: {e}")
             await asyncio.sleep(300)
 
-# ==================== ТЕСТОВЫЕ КОМАНДЫ ====================
-
-if TEST_MODE:
-    @dp.message(Command("test_payment"))
-    async def test_payment(message: types.Message):
-        """Имитация успешной оплаты для тестов"""
-        user_id = message.from_user.id
-        username = message.from_user.username or message.from_user.full_name
-        
-        add_subscription(user_id, username)
-        
-        try:
-            invite_link = await bot.create_chat_invite_link(
-                chat_id=CHANNEL_ID,
-                member_limit=1
-            )
-            
-            await message.answer(
-                f"🧪 ТЕСТОВАЯ ОПЛАТА УСПЕШНА!\n\n"
-                f"✅ Подписка активирована на {SUBSCRIPTION_DAYS} дней\n"
-                f"🔗 Ссылка: {invite_link.invite_link}\n\n"
-                f"Команды:\n"
-                f"/status - проверить статус\n"
-                f"/test_expiry - тест истечения подписки"
-            )
-        except Exception as e:
-            logger.error(f"Ошибка тестовой оплаты: {e}")
-            await message.answer(f"❌ Ошибка: {e}")
-
-    @dp.message(Command("test_expiry"))
-    async def test_expiry(message: types.Message):
-        """Тест истечения подписки"""
-        user_id = str(message.from_user.id)
-        users = load_users_data()
-        
-        if user_id in users:
-            # Устанавливаем "истечение" 10 секунд назад
-            users[user_id]["subscription_end"] = (datetime.now() - timedelta(seconds=10)).isoformat()
-            save_users_data(users)
-            await message.answer(
-                "🧪 Подписка помечена как истекшая 10 секунд назад\n"
-                "В течение часа бот должен вас исключить из канала\n"
-                "Для быстрой проверки перезапустите бота"
-            )
-        else:
-            await message.answer("❌ У вас нет подписки. Используйте /test_payment")
-
 # ==================== ЗАПУСК ====================
 
 async def main():
-    logger.info("=" * 40)
-    logger.info("Запуск бота...")
-    logger.info(f"Режим: {'ТЕСТОВЫЙ' if TEST_MODE else 'ПРОДАКШЕН'}")
+    logger.info("=" * 50)
+    logger.info("🚀 Запуск бота...")
+    logger.info(f"Режим: {'🧪 ТЕСТОВЫЙ (оплата не спишется)' if TEST_MODE else '💰 ПРОДАКШЕН (реальная оплата)'}")
+    logger.info(f"Цена подписки: {PRODUCT_PRICE} ⭐️")
+    logger.info(f"Длительность: {SUBSCRIPTION_DAYS} дней")
     logger.info(f"Файл данных: {DATA_FILE}")
     logger.info(f"Канал ID: {CHANNEL_ID}")
-    logger.info("=" * 40)
+    logger.info("=" * 50)
     
     # Запускаем фоновую задачу проверки подписок
     asyncio.create_task(check_expired_subscriptions())
