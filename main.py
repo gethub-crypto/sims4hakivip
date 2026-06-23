@@ -10,8 +10,8 @@ from aiogram.types import LabeledPrice, PreCheckoutQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ==================== НАСТРОЙКИ ====================
-BOT_TOKEN = "ВАШ_ТОКЕН_СЮДА"
-CHANNEL_ID = -1002150000000  # Ваш ID канала
+BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
+CHANNEL_ID = -1004390196653 # Ваш ID канала
 PRODUCT_PRICE = 199  # Цена в Stars (199 ⭐️)
 SUBSCRIPTION_DAYS = 30  # На сколько дней доступ
 TEST_MODE = True  # False когда всё готово
