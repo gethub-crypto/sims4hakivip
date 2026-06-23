@@ -4,3 +4,6 @@ builder = "nixpacks"
 [deploy]
 startCommand = "python main.py"
 restartPolicyType = "always"
+
+[volumes]
+mydata = "/app/data"
