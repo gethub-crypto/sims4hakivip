@@ -10,18 +10,14 @@ from aiogram.types import LabeledPrice, PreCheckoutQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ==================== SETTINGS ====================
-BOT_TOKEN = os.getenv("BOT_TOKEN")  # Use environment variable!
-CHANNEL_ID = int(os.getenv("CHANNEL_ID", "-1004390196653"))
+BOT_TOKEN = "8884956672:AAHY-4_NBDeYNxZ4C9G9T3HRHNYu6afBqUQ"
+CHANNEL_ID = -1004390196653  # Your channel ID
 PRODUCT_PRICE = 199  # Price in Stars (199 ⭐️)
 SUBSCRIPTION_DAYS = 30  # Subscription duration in days
 
 # Railway persistent storage
 DATA_DIR = os.getenv("RAILWAY_VOLUME_MOUNT_PATH", ".")
 DATA_FILE = os.path.join(DATA_DIR, "users_data.json")
-
-if not BOT_TOKEN:
-    print("❌ BOT_TOKEN is not set in environment variables!")
-    sys.exit(1)
 # =================================================
 
 logging.basicConfig(
@@ -33,7 +29,7 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# ==================== DATABASE FUNCTIONS ====================
+# ==================== DATABASE OPERATIONS ====================
 
 def load_users_data():
     """Load user data from JSON file"""
@@ -239,7 +235,7 @@ async def send_invoice(message: types.Message):
 
 @dp.pre_checkout_query()
 async def process_pre_checkout_query(pre_checkout_query: PreCheckoutQuery):
-    """Confirm payment pre-checkout"""
+    """Confirm payment"""
     user_id = pre_checkout_query.from_user.id
     logger.info(f"Pre-checkout query from user {user_id}")
     
@@ -338,8 +334,8 @@ async def link_command(message: types.Message):
 # ==================== AUTOMATIC KICK ====================
 
 async def check_expired_subscriptions():
-    """Periodically check for expired subscriptions and kick users"""
-    logger.info("🔄 Starting expired subscription check (every hour)")
+    """Periodically check for expired subscriptions and kick users from channel"""
+    logger.info("🔄 Started checking expired subscriptions (every hour)")
     
     while True:
         try:
@@ -354,7 +350,7 @@ async def check_expired_subscriptions():
                         expired_users.append(int(user_id))
             
             if expired_users:
-                logger.info(f"Found {len(expired_users)} users with expired subscriptions")
+                logger.info(f"Found users with expired subscriptions: {len(expired_users)}")
             
             for user_id in expired_users:
                 try:
@@ -401,7 +397,7 @@ async def check_expired_subscriptions():
 
 async def main():
     logger.info("=" * 50)
-    logger.info("🚀 BOT STARTING")
+    logger.info("🚀 BOT STARTING UP")
     logger.info(f"💰 Subscription price: {PRODUCT_PRICE} ⭐️")
     logger.info(f"📅 Duration: {SUBSCRIPTION_DAYS} days")
     logger.info(f"📁 Data file: {DATA_FILE}")
@@ -409,7 +405,7 @@ async def main():
     logger.info(f"⏰ Start time: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}")
     logger.info("=" * 50)
     
-    # Check if bot is channel admin
+    # Check that bot is a channel administrator
     try:
         bot_member = await bot.get_chat_member(CHANNEL_ID, (await bot.get_me()).id)
         if bot_member.status in ["administrator", "creator"]:
@@ -424,7 +420,7 @@ async def main():
     
     try:
         await bot.delete_webhook(drop_pending_updates=True)
-        logger.info("🤖 Bot is running and ready")
+        logger.info("🤖 Bot is up and running")
         await dp.start_polling(bot)
     except Exception as e:
         logger.error(f"❌ Critical error: {e}")
